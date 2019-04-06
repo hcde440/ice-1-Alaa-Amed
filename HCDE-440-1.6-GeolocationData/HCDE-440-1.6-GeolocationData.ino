@@ -56,22 +56,22 @@ void setup() { // Code runs only once or whenever we restart the board
   }
 
   Serial.println(); Serial.println("WiFi connected"); Serial.println(); // if connected to the Wi-Fi, print this message 
-  Serial.print("Your ESP has been assigned the internal IP address ");
+  Serial.print("Your ESP has been assigned the internal IP address "); // print this message to the serial monitor
   Serial.println(WiFi.localIP()); // Print IP address to the serial monitor
 
   getGeo(); // Function call: go run the code in getGeo
   
   // Print GeoData obtained to the serial monitor
-  Serial.println("Your external IP address is " + location.ip);
-  Serial.print("Your ESP is currently in " + location.cn + " (" + location.cc + "),");
+  Serial.println("Your external IP address is " + location.ip); // print IP address to the serial monitor
+  Serial.print("Your ESP is currently in " + location.cn + " (" + location.cc + "),"); // print location to the serial monitor
   Serial.println(" in or near " + location.cy + ", " + location.rc + ".");
-  Serial.println("and located at (roughly) ");
-  Serial.println(location.lt + " latitude by " + location.ln + " longitude."); 
+  Serial.println("and located at (roughly) "); // print this message to the serial monitor
+  Serial.println(location.lt + " latitude by " + location.ln + " longitude."); // print latitude and longitude to the serial monitor
 
   getMet(location.cy); // Function call: go run the code in getMet
 
   // Print weather data obtained to the serial monitor
-  Serial.println();
+  Serial.println(); // empty line 
   Serial.println("With " + conditions.cd + ", the temperature in " + location.cy + ", " + location.rc);
   Serial.println("is " + conditions.tp + "F, with a humidity of " + conditions.hd + "%. The winds are blowing");
   Serial.println(conditions.wd + " at " + conditions.ws + " miles per hour, and the ");
@@ -84,15 +84,16 @@ void loop() {
 
 String getIP() { // get IP address
   HTTPClient theClient;
-  String ipAddress;
+  String ipAddress; // variable declaration for IP Address, type: String
 
   theClient.begin("http://api.ipify.org/?format=json");
   int httpCode = theClient.GET();
 
-  if (httpCode > 0) {
-    if (httpCode == 200) {
+  if (httpCode > 0) { // check if http code is more than zero 
+    if (httpCode == 200) { // check of http code is more than zero eual to 200
 
-      DynamicJsonBuffer jsonBuffer;
+      DynamicJsonBuffer jsonBuffer; //  Dynamic Json buffer is allocated on the heap and grows automaticallyis 
+      // it is also the entry point for using the library: it handles the memory management and calls the parser
 
       String payload = theClient.getString();
       JsonObject& root = jsonBuffer.parse(payload);
@@ -112,12 +113,13 @@ void getGeo() {   // function called getGeo that provides geo data
   theClient.begin("http://api.ipstack.com/" + getIP() + "?access_key=" + key); //return IP as .json object
   int httpCode = theClient.GET();
 
-  if (httpCode > 0) { // If we get something back
-    if (httpCode == 200) {
-      Serial.println("Received HTTP payload.");
-      DynamicJsonBuffer jsonBuffer;
+  if (httpCode > 0) { // if we get something back
+    if (httpCode == 200) { // and it's equal to 200
+      Serial.println("Received HTTP payload."); // then print this 
+      DynamicJsonBuffer jsonBuffer;//  Dynamic Json buffer is allocated on the heap and grows automaticallyis 
+      // it is also the entry point for using the library: it handles the memory management and calls the parser
       String payload = theClient.getString();
-      Serial.println("Parsing...");
+      Serial.println("Parsing..."); // print this message to the serial monitor
       JsonObject& root = jsonBuffer.parse(payload);
 
       // Test if parsing succeeds.
@@ -144,7 +146,7 @@ void getGeo() {   // function called getGeo that provides geo data
       location.ln = root["longitude"].as<String>();
 
     } else {
-      Serial.println("Something went wrong with connecting to the endpoint.");
+      Serial.println("Something went wrong with connecting to the endpoint."); // if we were not, for some reason, able to receive responses, then print this tp dserial monitor 
     }
   }
 }
@@ -162,31 +164,32 @@ void getMet(String city) { // function called getMet that provides weather data
 
     if (httpCode == HTTP_CODE_OK) {
       String payload = theClient.getString();
-      DynamicJsonBuffer jsonBuffer;
+      DynamicJsonBuffer jsonBuffer; //  Dynamic Json buffer is allocated on the heap and grows automaticallyis 
+      // it is also the entry point for using the library: it handles the memory management and calls the parser
       JsonObject& root = jsonBuffer.parseObject(payload);
       
-      if (!root.success()) { // Test if parsing succeeds.
-        Serial.println("parseObject() failed in getMet()."); // If parsing doesn't successed, print that to serial monitor 
+      if (!root.success()) { // test if parsing succeeds.
+        Serial.println("parseObject() failed in getMet()."); // if parsing doesn't successed, print that to serial monitor 
         return;
       }
-      conditions.tp = root["main"]["temp"].as<String>();     //we cast the values as Strings b/c
-      conditions.pr = root["main"]["pressure"].as<String>(); //the 'slots' in GeoData are Strings
+      conditions.tp = root["main"]["temp"].as<String>();     // we cast the values as Strings b/c
+      conditions.pr = root["main"]["pressure"].as<String>(); // the 'slots' in GeoData are Strings
       conditions.hd = root["main"]["humidity"].as<String>();
       conditions.cd = root["weather"][0]["description"].as<String>();
       conditions.ws = root["wind"]["speed"].as<String>();
       int deg = root["wind"]["deg"].as<int>();
-      conditions.wd = getNSEW(deg);
+      conditions.wd = getNSEW(deg);  // save the returned value from gerNSEW into conditions.wd 
     }
   }
   else {
-    Serial.printf("Something went wrong with connecting to the endpoint in getMet().");
+    Serial.printf("Something went wrong with connecting to the endpoint in getMet()."); // if we were not, for some reason, able to receive responses, then print this tp dserial monitor 
   }
 }
 
 String getNSEW(int d) {
-  String direct;
+  String direct; // create a string called direct
 
-  //Conversion based upon http://climate.umn.edu/snow_fence/Components/winddirectionanddegreeswithouttable3.htm
+  // conversion based upon http://climate.umn.edu/snow_fence/Components/winddirectionanddegreeswithouttable3.htm
   if (d > 348.75 && d < 360 || d >= 0  && d < 11.25) {
     direct = "north";
   };
@@ -235,5 +238,5 @@ String getNSEW(int d) {
   if (d < 326.25 && d < 348.75) {
     direct = "north northwest";
   };
-  return direct;
+  return direct; //return string
 }
